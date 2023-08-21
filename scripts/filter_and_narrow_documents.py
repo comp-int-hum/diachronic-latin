@@ -3,39 +3,50 @@ import gzip
 import re
 import json
 import math
-import fasttext
-from huggingface_hub import hf_hub_download
 
 
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--input", dest="input", help="Input file")
+    parser.add_argument("--lid", dest="lid", help="Input file")
+    parser.add_argument("--content", dest="content", help="Input file")    
     parser.add_argument("--output", dest="output", help="Output file")
     parser.add_argument("--tokens_per_chunk", dest="tokens_per_chunk", type=int, default=200, help="")
     args = parser.parse_args()
 
-    model_path = hf_hub_download(repo_id="arc-r/fasttext-language-identification", filename="lid.176.bin")
-    model = fasttext.load_model(model_path)
+    keep = {}
+    with gzip.open(args.lid, "rt") as ifd:
+        for row in ifd:
+            j = json.loads(row)
+            key = (j["author"], j["title"])
+            if len(j["language_id"]) > 0:
+                langs = [x["language_probabilities"][0][0] for x in j["language_id"]]
+                lat_prop = len([x for x in langs if x == "la"]) / len(langs)
+                if lat_prop > 0.7:
+                    cur = keep.get(key, [0.0])[0]
+                    if lat_prop > cur:
+                        langs = list(reversed(j["language_id"]))
+                        while len(langs) > 0 and (langs[0]["language_probabilities"][0][0] != "la" or langs[0]["digit_proportion"] > 0.05 or langs[0]["punctuation_proportion"] > 0.05):
+                            langs = langs[1:]
+                        j["language_id"] = list(reversed(langs))
+                        keep[key] = [lat_prop, j]
+
+    keep = {j["htid"] : j for _, (_, j) in keep.items()}
+
     
-    with gzip.open(args.input, "rt") as ifd, gzip.open(args.output, "wt") as ofd:
+    with gzip.open(args.content, "rt") as ifd, gzip.open(args.output, "wt") as ofd:
         for line in ifd:
             j = json.loads(line)
+            if j["htid"] not in keep:
+                continue
             toks = re.split(r"\s+", j["content"])
             span_count = math.ceil(len(toks) / args.tokens_per_chunk)
             chunks = [" ".join(toks[i * args.tokens_per_chunk : (i + 1) * args.tokens_per_chunk]) for i in range(span_count)]
-            labels, probs = model.predict(chunks, k=3)
-            final_labels = []
-            for chunk, l, p in zip(chunks, labels, probs):                
-                if l[0] != "__label__la" and len(chunk) > 0:                    
-                    digit_prop = len(re.sub(r"[^0-9]", "", chunk)) / len(chunk)
-                    punct_prop = len(re.sub(r"[^{}()-~.';[\]]", "", chunk)) / len(chunk)
-                    if digit_prop > 0.25:
-                        label = "noise"
-                    else:
-                        label = l[0].split("_")[-1]
-                else:
-                    label = "la"
-                final_labels.append(label)
-            ofd.write(json.dumps(dict([(k, v) for k, v in j.items() if k != "content"] + [("labels", final_labels)])) + "\n")
-
+            chunks_to_keep = []
+            preamble = True
+            for chunk, scores in zip(chunks, keep[j["htid"]]["language_id"]):
+                if preamble == False or (scores["language_probabilities"][0][0] == "la" and scores["punctuation_proportion"] < 0.05 and scores["digit_proportion"] < 0.05):
+                    preamble = False
+                    chunks_to_keep.append(chunk)
+            j["content"] = " ".join(chunks_to_keep)
+            ofd.write(json.dumps(j) + "\n")
