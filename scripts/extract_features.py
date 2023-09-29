@@ -1,8 +1,10 @@
 from dataclasses import dataclass, field, asdict
+from boltons.cacheutils import cachedproperty
 from typing import List, Type
 import re
 import os.path
 import os
+from zipfile import ZipFile
 import argparse
 import json
 import gzip
@@ -19,32 +21,18 @@ from cltk.alphabet.processes import LatinNormalizeProcess
 logger = logging.getLogger("extract_features.py")
 
 class CustomStanzaWrapper(StanzaWrapper):
-    def _load_pipeline(self):
-        models_dir = os.path.expanduser(
-            "~/stanza_resources/"
-        )  # TODO: Mv this a self. var or maybe even global
-        processors = "tokenize,mwt,pos,lemma,depparse"
-        lemma_use_identity = False
-        if self.language == "fro":
-            processors = "tokenize,pos,lemma,depparse"
-            lemma_use_identity = True
-        if self.language in ["chu", "got", "grc", "lzh"]:
-            # Note: MWT not available for several languages
-            processors = "tokenize,pos,lemma,depparse"
-        nlp = stanza.Pipeline(
-            lang=self.stanza_code,
-            dir=models_dir,
-            package=self.treebank,
-            processors=processors,  # these are the default processors
-            logging_level=self.stanza_debug_level,
-            use_gpu=True,  # default, won't fail if GPU not present
-            kwargs={"depparse_batch_size" : 20000},
-            lemma_use_identity=lemma_use_identity,
-        )
-        return nlp
+    @classmethod
+    def get_nlp(cls, language: str, treebank = None):
+        if language in cls.nlps:
+            return cls.nlps[language]
+        else:
+            nlp = cls(language, treebank, interactive=False)
+            cls.nlps[language] = nlp
+            return nlp
 
 @dataclass
 class CustomStanzaProcess(LatinStanzaProcess):
+    @cachedproperty
     def algorithm(self):
         return CustomStanzaWrapper.get_nlp(language=self.language)
 
@@ -55,7 +43,7 @@ class CustomPipeline(Pipeline):
     processes: List[Type[Process]] = field(
         default_factory=lambda: [
             LatinNormalizeProcess,
-            LatinStanzaProcess,
+            CustomStanzaProcess,
         ]
     )
 
@@ -68,20 +56,21 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-i", "--input", dest="input", help="Input file")
     parser.add_argument("-o", "--output", dest="output", help="Output file")
-    parser.add_argument("--perseus_root", dest="perseus_root", default="/export/data/classics/perseus")
+    parser.add_argument("--perseus_corpus", dest="perseus_corpus", required=True)
     args = parser.parse_args()
 
     logging.basicConfig(level=logging.INFO)
 
     perseus_vocab = {}
-    for fname in glob(os.path.join(args.perseus_root, "*/*/*lat*")):
-        with open(fname, "rt") as ifd:
-            soup = BeautifulSoup(ifd.read(), 'xml')
-            for text in soup.find_all("text"):
-                for tok in re.split(r"\s+", text.get_text().lower()):
-                    perseus_vocab[tok] = perseus_vocab.get(tok, 0) + 1
+    with ZipFile(args.perseus_corpus, "r") as zifd:
+        for name in zifd.namelist():
+            if re.match(r".*lat\.xml", name):
+                with zifd.open(name, "r") as ifd:
+                    soup = BeautifulSoup(ifd.read(), 'xml')
+                    for text in soup.find_all("text"):
+                        for tok in re.split(r"\s+", text.get_text().lower()):
+                            perseus_vocab[tok] = perseus_vocab.get(tok, 0) + 1
     perseus_vocab = {k : v for k, v in perseus_vocab.items() if v > 3}
-    
     nlp = NLP(language="lat", custom_pipeline=CustomPipeline(), suppress_banner=True)
 
     try:

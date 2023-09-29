@@ -11,7 +11,7 @@ import time
 import imp
 import sys
 import json
-import steamroller
+from steamroller import Environment
 
 # workaround needed to fix bug with SCons and the pickle module
 del sys.modules['pickle']
@@ -28,10 +28,10 @@ vars.AddVariables(
     ("TRAIN_PROPORTION", "", 0.8),
     ("DEV_PROPORTION", "", 0.1),
     ("TEST_PROPORTION", "", 0.1),    
-    ("HATHITRUST_ROOT", "", "/export/large_corpora/hathi_trust"),
-    ("PERSEUS_ROOT", "", "/export/data/classics/perseus"),
+    ("HATHITRUST_ROOT", "", "~/corpora/hathi_trust"),
+    ("PERSEUS_CORPUS", "", "~/corpora/perseus_classics.zip"),
     ("HATHITRUST_INDEX", "", "${HATHITRUST_ROOT}/hathi_full_20211001.txt.gz"),
-    ("DTM_ROOT", "Path to the (compiled) dynamic topic modeling repository", "~/dtm"),
+    ("DTM_ROOT", "Path to the (compiled) dynamic topic modeling repository", "~/projects/dtm"),
     ("TOKENS_PER_CHUNK", "", 200),
     ("WINDOW_COUNT", "", 20),
     ("RANDOM_SEED", "", 0),
@@ -40,7 +40,9 @@ vars.AddVariables(
     ("MAX_CHUNKS_PER_WINDOW", "", 500),
     ("TOPIC_COUNT", "", 20),
     ("USE_PRECOMPUTED_FEATURES", "If set, the file 'work/features.jsonl.gz' should already exist (e.g. from an earlier invocation of the build, or copied from another location)", False),
-    ("USE_PRETRAINED_TOPIC_MODELS", "If set, the various 'dtm_model*.tgz' files should exist under work/", False),    
+    ("USE_PRETRAINED_TOPIC_MODELS", "If set, the various 'dtm_model*.tgz' files should exist under work/", False),
+    #("CPU_QUEUE", "", "defq"),
+
 )
 
 env = Environment(
@@ -48,7 +50,7 @@ env = Environment(
     ENV=os.environ,
     TARFLAGS="-c -z",
     TARSUFFIX=".tgz",
-    tools=[steamroller.generate],
+    tools=[],
     BUILDERS={
         "FilterHathiTrust" : Builder(
             action="python scripts/filter_hathitrust.py --output ${TARGETS[0]} --hathitrust_index ${HATHITRUST_INDEX}"
@@ -94,6 +96,7 @@ env = Environment(
         )        
     }
 )
+
 
 # function for width-aware printing of commands
 def print_cmd_line(s, target, source, env):
