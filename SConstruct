@@ -22,27 +22,29 @@ import pickle
 vars = Variables("custom.py")
 vars.AddVariables(
     ("OUTPUT_WIDTH", "", 5000),
-    ("FOLDS", "", 5),
-    ("N", "", 3),
     ("RANDOM_SEED", "", 0),
-    ("TRAIN_PROPORTION", "", 0.8),
-    ("DEV_PROPORTION", "", 0.1),
-    ("TEST_PROPORTION", "", 0.1),    
     ("HATHITRUST_ROOT", "", "~/corpora/hathi_trust"),
     ("PERSEUS_CORPUS", "", "~/corpora/perseus_classics.zip"),
     ("HATHITRUST_INDEX", "", "${HATHITRUST_ROOT}/hathi_full_20211001.txt.gz"),
-    ("DTM_ROOT", "Path to the (compiled) dynamic topic modeling repository", "~/projects/dtm"),
-    ("TOKENS_PER_CHUNK", "", 200),
-    ("WINDOW_COUNT", "", 20),
-    ("RANDOM_SEED", "", 0),
-    ("MIN_TOKEN_PROPORTION", "", 0.00001),
-    ("MAX_CHUNK_PROPORTION", "", 0.2),
-    ("MAX_CHUNKS_PER_WINDOW", "", 500),
-    ("TOPIC_COUNT", "", 20),
-    ("USE_PRECOMPUTED_FEATURES", "If set, the file 'work/features.jsonl.gz' should already exist (e.g. from an earlier invocation of the build, or copied from another location)", False),
-    ("USE_PRETRAINED_TOPIC_MODELS", "If set, the various 'dtm_model*.tgz' files should exist under work/", False),
-    #("CPU_QUEUE", "", "defq"),
-
+    ("MAX_SUBDOC_LENGTHS", "", [500]), #[200, 500, 1000, 2000]),
+    ("MIN_WORD_OCCURRENCE", "", 10),
+    ("MAX_WORD_PROPORTION", "", 0.7),
+    ("TOP_NEIGHBORS", "", 15),
+    ("TOP_TOPIC_WORDS", "", 5),
+    ("TOPIC_COUNT", "", 50),
+    ("EPOCHS", "", 500),
+    ("LIMIT_DOCS", "", 2020),
+    ("CUDA_DEVICE", "", "cpu"),
+    ("BATCH_SIZE", "", 1000),
+    ("WINDOW_SIZE", "", 50),
+    ("LEARNING_RATE", "", 0.0001),
+    ("DETM_PATH", "", "../DETM"),
+    ("USE_PRECOMPUTED_FEATURES", "If set, the file 'work/features.jsonl.gz' should already exist", False),
+    ("USE_PRETRAINED_TOPIC_MODELS", "", False),
+    ("USE_PRETRAINED_EMBEDDINGS", "", False),
+    ("PREFIXES_TO_PRESERVE", "", ["fig", "fing", "fact", "effig", "fict", "nov", "color", "curs", "magn", "form", "multi", "morph", "eid", "schem", "typ", "plas", "mege", "kines", "chrom", "exempl", "statu", "imag", "spec", "simula", "membr", "primord", "princip", "corp", "element", "sem"]),
+    ("AUTHOR_TARGETS", "", ["Varro", "Cicero", "Lucretius"]),
+    ("WORD_SIMILARITY_TARGETS", "", ["figura", "imago", "corpus"]),
 )
 
 env = Environment(
@@ -70,14 +72,20 @@ env = Environment(
         "ExtractFeatures" : Builder(
             action="python scripts/extract_features.py --input ${SOURCES[0]} --output ${TARGETS[0]}"
         ),
-        "FormatForDTM" : Builder(
-            action="python scripts/format_for_dtm.py --input ${SOURCES[0]} --text_output ${TARGETS[0]} --time_output ${TARGETS[1]} --vocab_output ${TARGETS[2]} --metadata_output ${TARGETS[3]} --tokens_per_chunk ${TOKENS_PER_CHUNK} --window_count ${WINDOW_COUNT} --random_seed ${RANDOM_SEED} --min_token_proportion ${MIN_TOKEN_PROPORTION} --max_chunk_proportion ${MAX_CHUNK_PROPORTION}  --lowercase --max_chunks_per_window ${MAX_CHUNKS_PER_WINDOW}"
+        "TrainEmbeddings" : Builder(
+            action="python scripts/train_embeddings.py --input ${SOURCES[0]} --output ${TARGETS[0]}"
         ),
-        "TrainDTM" : Builder(
-            action="python scripts/train_dtm.py --text_input ${SOURCES[0]} --time_input ${SOURCES[1]} --dtm_path ${DTM_ROOT} --output ${TARGETS[0]} --topic_count ${TOPIC_COUNT}"
+        "TrainDETM" : Builder(
+            action="python scripts/train_detm.py --train ${SOURCES[0]} ${'--val ' + SOURCES[2].rstr() if len(SOURCES) == 3 else ''} --embeddings ${SOURCES[1]} --window_size ${WINDOW_SIZE} --max_subdoc_length ${MAX_SUBDOC_LENGTH} --device ${CUDA_DEVICE} --batch_size ${BATCH_SIZE} --epochs ${EPOCHS} --output ${TARGETS[0]} --num_topics ${TOPIC_COUNT} --learning_rate ${LEARNING_RATE} --min_word_occurrence ${MIN_WORD_OCCURRENCE} --max_word_proportion ${MAX_WORD_PROPORTION}"
         ),
-        "InspectDTM" : Builder(
-            action="python scripts/inspect_dtm.py --model ${SOURCES[0]} --vocab ${SOURCES[1]} --metadata ${SOURCES[2]} --text ${SOURCES[3]} --time ${SOURCES[4]} --docs ${SOURCES[5]} --output ${TARGETS[0]}"
+        "ApplyDETM" : Builder(
+            action="python scripts/apply_detm.py --model ${SOURCES[0]} --input ${SOURCES[1]} --max_subdoc_length ${MAX_SUBDOC_LENGTH} --device ${CUDA_DEVICE} --output ${TARGETS[0]}"
+        ),
+        "GenerateWordSimilarityTable" : Builder(
+            action="python scripts/generate_word_similarity_table.py --model ${SOURCES[0]} --output ${TARGETS[0]} --target_words ${WORD_SIMILARITY_TARGETS} --top_neighbors ${TOP_NEIGHBORS}"
+        ),
+        "GenerateTopicsSummaryTable" : Builder(
+            action="python scripts/generate_topics_summary_table.py --model ${SOURCES[0]} --output ${TARGETS[0]} --top_words ${TOP_TOPIC_WORDS}"
         ),
         "CompareVocabularies" : Builder(
             action="python scripts/compare_vocabularies.py --input_htid ${INPUT_HTID} --input_perseus ${INPUT_PERSEUS} --hathitrust_root ${HATHITRUST_ROOT} --output ${TARGETS[0]} --perseus_root ${PERSEUS_ROOT}"
@@ -89,14 +97,28 @@ env = Environment(
             action="python scripts/combine_jsonl.py --inputs ${SOURCES} --output ${TARGETS[0]}"
         ),
         "FilterUnknownWords" : Builder(
-            action="python scripts/filter_unknown_words.py --input ${SOURCES[0]} --output ${TARGETS[0]}"
+            action="python scripts/filter_unknown_words.py --input ${SOURCES[0]} --output ${TARGETS[0]} --prefixes_to_preserve ${PREFIXES_TO_PRESERVE}"
         ),
         "CombineFeatures" : Builder(
             action="python scripts/combine_features.py --input ${SOURCES[0]} --output ${TARGETS[0]}"
-        )        
+        ),
+        "FormatDETMInput" : Builder(
+            action="python scripts/format_detm_input.py --data_path ${DATA_PATH} --train_output ${TARGETS[0]} --val_output ${TARGETS[1]} --test_output ${TARGETS[2]}"
+        ),
+        "CollectParsingStatistics" : Builder(
+            action="python scripts/collect_parsing_statistics.py --input ${SOURCES[0]} --output ${TARGETS[0]}"
+        ),
+        "CollectTopicStatistics" : Builder(
+            action="python scripts/collect_topic_statistics.py --input ${SOURCES[0]} --output ${TARGETS[0]}"
+        ),
+        "CreateMatrices" : Builder(
+            action="python scripts/create_matrices.py --parse_stats ${SOURCES[0]} --topic_annotations ${SOURCES[1]} --output ${TARGETS[0]} --window_size ${WINDOW_SIZE}"
+        ),
+        "CreateFigures" : Builder(
+            action="python scripts/create_figures.py --input ${SOURCES[0]} --plots ${TARGETS[0]} --tables ${TARGETS[1]}"
+        )
     }
 )
-
 
 # function for width-aware printing of commands
 def print_cmd_line(s, target, source, env):
@@ -161,54 +183,130 @@ else:
         feat_files
     )
 
-text_for_dtm = env.FilterUnknownWords(
-    "work/text_for_dtm.jsonl.gz",
+text_for_detm = env.File("text_for_detm.jsonl.gz")
+
+#env.FilterUnknownWords(
+#    "work/text_for_detm.jsonl.gz",
+#    cltk_features
+#)
+
+parse_stats = env.CollectParsingStatistics(
+    "work/parsing_stats.jsonl.gz",
     cltk_features
 )
 
-if env["USE_PRETRAINED_TOPIC_MODELS"]:
-
-    model = env.File("work/dtm_model.tgz")
-    
+if env["USE_PRETRAINED_EMBEDDINGS"]:
+    embeddings = env.File("work/embeddings.bin")
 else:
+    embeddings = env.TrainEmbeddings(
+        "work/embeddings.bin",
+        text_for_detm
+    )
+
+for msl in env["MAX_SUBDOC_LENGTHS"]:
+
+    if env["USE_PRETRAINED_TOPIC_MODELS"]:
+        topic_model = env.File("work/detm_model_{}.bin.gz".format(msl))
+    else:
+        topic_model = env.TrainDETM(
+            "work/detm_model_${MAX_SUBDOC_LENGTH}.bin.gz",
+            [
+                text_for_detm,
+                embeddings
+            ],
+            BATCH_SIZE=2000,
+            EPOCHS=1000,
+            MIN_WORD_OCCURRENCE=1,
+            MAX_WORD_PROPORTION=0.7,
+            WINDOW_SIZE=100,
+            LEARNING_RATE=0.0008*20,
+            CUDA_DEVICE="cuda:1",
+            MAX_SUBDOC_LENGTH=msl
+        )
+
+    word_similarity_table = env.GenerateWordSimilarityTable(
+        "work/word_similarity_${MAX_SUBDOC_LENGTH}.tex",
+        [topic_model],
+        WORD_SIMILARITY_TARGETS=["figura", "imago", "fortuna", "praefectus", "candidatus"],
+        MAX_SUBDOC_LENGTH=msl,
+        TOP_NEIGHBORS=5
+    )
+
+    topics_table = env.GenerateTopicsSummaryTable(
+        "work/topics_summary_${MAX_SUBDOC_LENGTH}.tex",
+        topic_model,
+        MAX_SUBDOC_LENGTH=msl,        
+    )
+
+    labeled = env.ApplyDETM(
+        "work/labeled_${MAX_SUBDOC_LENGTH}.jsonl.gz",
+        [topic_model, text_for_detm],
+        MAX_SUBDOC_LENGTH=msl
+    )
     
-    dtm_text_input, dtm_time_input, vocab, metadata = env.FormatForDTM(
+    # topic_stats = env.CollectTopicStatistics(
+    #     "work/topic_stats_${MAX_SUBDOC_LENGTH}.json.gz",
+    #     labeled,
+    #     MAX_SUBDOC_LENGTH=msl
+    # )
+
+    matrices = env.CreateMatrices(
+        "work/matrices_${MAX_SUBDOC_LENGTH}.pkl.gz",
         [
-            "work/dtm_input-mult.dat",
-            "work/dtm_input-seq.dat",
-            "work/dtm_vocab.json.gz",
-            "work/dtm_doc_metadata.jsonl.gz"
+            parse_stats,
+            labeled
         ],
-        text_for_dtm
+        MAX_SUBDOC_LENGTH=msl,
+        WINDOW_SIZE=100
     )
-
-    topic_model = env.TrainDTM(
-        "work/dtm_model.tgz",
+    
+    figures = env.CreateFigures(
         [
-            dtm_text_input,
-            dtm_time_input
-        ]
+            "work/plots_${MAX_SUBDOC_LENGTH}.png",
+            "work/tables_${MAX_SUBDOC_LENGTH}.tex"
+        ],
+        matrices,
+        MAX_SUBDOC_LENGTH=msl,
+        WINDOW_SIZE=100
     )
-
-# topic_model_features = env.ApplyDTM(
-#     "work/dtm_features.jsonl.gz",
+    
+# acl_train, acl_val, acl_test = env.FormatDETMInput(
 #     [
-#         topic_model,
-#         text_for_dtm
-#     ]
+#         "work/acl_train.jsonl.gz",
+#         "work/acl_val.jsonl.gz",
+#         "work/acl_test.jsonl.gz",
+#     ],
+#     [],
+#     DATA_PATH="${DETM_PATH}/data_acl_largev/min_df_10",
 # )
 
-summary = env.InspectDTM(
-    "work/dtm_summary.txt",
-    [
-        topic_model,
-        vocab,
-        metadata,
-        dtm_text_input,
-        dtm_time_input,
-        text_for_dtm,
-    ]
-)
+# acl_topic_model = env.TrainDETM(
+#     "work/acl_detm_model.bin.gz",
+#     [
+#         acl_train,
+#         "${DETM_PATH}/embeddings/acl/skipgram_emb_300d.txt",
+#         acl_val,
+#     ],
+#     BATCH_SIZE=1000,
+#     EPOCHS=30,
+#     MIN_WORD_OCCURRENCE=0,
+#     MAX_WORD_PROPORTION=1.0,
+#     WINDOW_SIZE=1,
+#     LEARNING_RATE=0.0008*10,
+#     CUDA_DEVICE="cuda:1",
+#     MAX_SUBDOC_LENGTH=100000    
+# )
+    
+# acl_word_similarity_table = env.GenerateWordSimilarityTable(
+#     "work/acl_word_similarity.tex",
+#     [acl_topic_model],
+#     WORD_SIMILARITY_TARGETS=["neural", "parse", "semantics", "translation", "memory"]
+# )
+
+# acl_topics_table = env.GenerateTopicsSummaryTable(
+#    "work/acl_topics_summary.tex",
+#    acl_topic_model
+# )
 
 # vocab_comparison = env.CompareVocabularies(
 #     "work/vocab_comparison.txt",
