@@ -49,85 +49,15 @@ def apply(model, data, norm_data, times, rnn_input, num_subdocs, device):
     
     eta = get_eta(model, rnn_input, device)
 
-    #acc_loss = 0
-    #cnt = 0
-    #for idx, ind in enumerate(indices):
-    #data_batch, times_batch = data.get_batch(
-    #    tokens, counts, ind, args.vocab_size, args.emb_size, temporal=True, times=times)
-    #sums = data_batch.sum(1).unsqueeze(1)
-    #if args.bow_norm:
-    #    normalized_data_batch = data_batch / sums
-    #else:
-    #    normalized_data_batch = data_batch
-    print(eta.shape)
+
     eta_td = eta[times.type('torch.LongTensor')]
     theta = get_theta(eta_td, norm_data)
     alpha_td = alpha[:, times.type('torch.LongTensor'), :]
     beta = model.get_beta(alpha_td).permute(1, 0, 2)
-    
-    #print(alpha.shape) # topic x time x emb_dim, emb_val
-    #print(alpha_td.shape) # topic x doc x emb_dim, emb_val
-    #print(beta.shape) # doc x topic x word, p(w|topic)
-
-    #print(eta.shape) # time x topic
-    #print(eta_td.shape) # doc x topic
-    #print(theta.shape) # doc x topic, p(t)
 
     lik = theta.unsqueeze(2) * beta
 
     return lik.to("cpu")
-
-    #print(loglik.shape) # doc x topic x word, p(w | d, t)
-    #print(loglik.sum(1).sum(1))
-    
-    #loglik = loglik.sum(1)
-    #loglik = torch.log(loglik)
-    #print(loglik.shape)
-    #nll = -loglik * data_batch
-    #nll = nll.sum(-1)
-    #loss = nll / sums.squeeze()
-    #loss = loss.mean().item()
-    #acc_loss += loss
-    #cnt += 1
-    #return None
-
-
-# def apply(model, batch, norm_batch, times, rnn_input, num_subdocs):
-
-#     indices = torch.split(torch.tensor(range(batch.shape[0])), 100)
-
-#     acc_loss = 0
-#     cnt = 0
-#     indices = torch.split(torch.tensor(range(args.num_docs_test)), args.eval_batch_size)
-#     for idx, ind in enumerate(indices):
-#         data_batch_1, times_batch_1 = data.get_batch(
-#             tokens_1, counts_1, ind, args.vocab_size, args.emb_size, temporal=True, times=test_times)
-#         sums_1 = data_batch_1.sum(1).unsqueeze(1)
-#         if args.bow_norm:
-#             normalized_data_batch_1 = data_batch_1 / sums_1
-#         else:
-#             normalized_data_batch_1 = data_batch_1
-
-#         eta_td_1 = eta_1[times_batch_1.type('torch.LongTensor')]
-#         theta = get_theta(eta_td_1, normalized_data_batch_1)
-
-#         data_batch_2, times_batch_2 = data.get_batch(
-#             tokens_2, counts_2, ind, args.vocab_size, args.emb_size, temporal=True, times=test_times)
-#         sums_2 = data_batch_2.sum(1).unsqueeze(1)
-
-#         alpha_td = alpha[:, times_batch_2.type('torch.LongTensor'), :]
-#         beta = model.get_beta(alpha_td).permute(1, 0, 2)
-#         loglik = theta.unsqueeze(2) * beta
-#         loglik = loglik.sum(1)
-#         loglik = torch.log(loglik)
-#         nll = -loglik * data_batch_2
-#         nll = nll.sum(-1)
-#         loss = nll / sums_2.squeeze()
-#         loss = loss.mean().item()
-#         acc_loss += loss
-#         cnt += 1
-#     cur_loss = acc_loss / cnt
-#     ppl_dc = round(math.exp(cur_loss), 1)
 
 
 if __name__ == "__main__":
@@ -137,24 +67,24 @@ if __name__ == "__main__":
     parser.add_argument("--model", dest="model", help="Model file")
     parser.add_argument("--output", dest="output", help="File to save model to", required=True)
     parser.add_argument("--max_subdoc_length", dest="max_subdoc_length", type=int, default=200, help="Documents will be split into subdocuments of at most this number of tokens")
-    #parser.add_argument('--device') #, choices=["cpu", "cuda"], help='')
+    parser.add_argument('--device') #, choices=["cpu", "cuda"], help='')
     parser.add_argument('--batch_size', type=int, default=100, help='')
     args = parser.parse_args()
     
     logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 
-    #if not args.device:
-    #    args.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")    
-    #elif args.device == "cuda" and not torch.cuda.is_available():
-    #    logger.warning("Setting device to CPU because CUDA isn't available")
-    #    args.device = "cpu"
+
+    if not args.device:
+       args.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")    
+    elif args.device == "cuda" and not torch.cuda.is_available():
+       logger.warning("Setting device to CPU because CUDA isn't available")
+       args.device = "cpu"
     
     with gzip.open(args.model, "rb") as ifd:
-        model = torch.load(ifd, map_location=torch.device("cpu"))
+        model = torch.load(ifd, map_location=torch.device(args.device))
 
     token2id = {v : k for k, v in model.id2token.items()}
     id2token = model.id2token
-    #model.to(args.device)
 
     all_subdocs = []
     model.eval()
@@ -200,8 +130,8 @@ if __name__ == "__main__":
 
         indices = torch.arange(0, len(all_subdocs), dtype=torch.int)
         indices = torch.split(indices, args.batch_size) 
-        rnn_input = torch.zeros(model.num_times, len(model.id2token)).to("cpu")
-        cnt = torch.ones(model.num_times, ).to("cpu")
+        rnn_input = torch.zeros(model.num_times, len(model.id2token)).to(args.device)
+        cnt = torch.ones(model.num_times, ).to(args.device)
         for idx, ind in enumerate(indices):
             batch_size = len(ind)
             data_batch = np.zeros((batch_size, len(id2token)))
@@ -212,8 +142,8 @@ if __name__ == "__main__":
                 times_batch[i] = subdoc["window"] #timestamp
                 for k, v in subdoc["counts"].items():
                     data_batch[i, k] = v
-            data_batch = torch.from_numpy(data_batch).float().to("cpu")
-            times_batch = torch.from_numpy(times_batch).to("cpu")
+            data_batch = torch.from_numpy(data_batch).float().to(args.device)
+            times_batch = torch.from_numpy(times_batch).to(args.device)
             for t in range(model.num_times):
                 tmp = (times_batch == t).nonzero()
                 docs = data_batch[tmp].squeeze().sum(0)
@@ -234,12 +164,10 @@ if __name__ == "__main__":
                 times_batch[i] = subdoc["window"] #timestamp
                 for k, v in subdoc["counts"].items():
                     data_batch[i, k] = v
-            data_batch = torch.from_numpy(data_batch).float().to("cpu")
-            times_batch = torch.from_numpy(times_batch).to("cpu")
+            data_batch = torch.from_numpy(data_batch).float().to(args.device)
+            times_batch = torch.from_numpy(times_batch).to(args.device)
             sums = data_batch.sum(1).unsqueeze(1)
             normalized_data_batch = data_batch / sums
-
-            #print(normalized_data_batch.sum(1))
             out = apply(
                 model,
                 data_batch,
@@ -247,8 +175,7 @@ if __name__ == "__main__":
                 times_batch,
                 rnn_input,
                 len(all_subdocs),
-                "cpu"
-                #args.device
+                args.device
             )
             for lik, i in zip(out, ind):
                 lik = lik.argmax(0)

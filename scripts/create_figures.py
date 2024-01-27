@@ -16,10 +16,18 @@ import ruptures
 
 warnings.simplefilter("ignore")
 
+import pickle
+import pandas
+from matplotlib.figure import Figure
+from matplotlib.axes import Axes
+import numpy
+
+
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--input", dest="input", help="Input file")
+
     parser.add_argument("--num_top_words", dest="num_top_words", type=int, default=10)
     parser.add_argument("--step_size", dest="step_size", type=int, default=1)
     parser.add_argument("--word_image", dest="word_image", help="Output file")

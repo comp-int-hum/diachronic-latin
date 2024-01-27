@@ -17,9 +17,6 @@ import torch
 logger = logging.getLogger("train_dtm")
 
 
-#torch.autograd.set_detect_anomaly(True)
-
-
 def get_theta(model, eta, bows):
     model.eval()
     with torch.no_grad():
@@ -156,6 +153,7 @@ if __name__ == "__main__":
     parser.add_argument('--train_proportion', type=float, default=0.7, help='')
     parser.add_argument("--min_time", type=int, default=0)
     parser.add_argument("--max_time", type=int, default=0)
+
     args = parser.parse_args()
     
     logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
@@ -256,14 +254,24 @@ if __name__ == "__main__":
     logger.info("Keeping %d words from a vocabulary of %d", len(vocab_to_keep), len(token2subdoccount))
 
     sorted_times = list(sorted(unique_times))
+
     min_time = args.min_time if args.min_time else (sorted_times[0] - 1)
     max_time = args.max_time if args.max_time else (sorted_times[-1] + 1)
     span = max_time - min_time
+
+    #min_time = sorted_times[0]
+    #max_time = sorted_times[-1]
+    #span = max_time - min_time + 1
+
     time2window = {}
 
     cur_min_time = min_time
     cur_max_time = min_time
+
     window_counts = {}
+
+    unique_windows = set()
+
     for i in range(math.ceil(span / args.window_size)):
         cur_max_time += args.window_size
         j = 0
@@ -271,6 +279,7 @@ if __name__ == "__main__":
             time2window[sorted_times[j]] = i
             j += 1
             key = (cur_min_time, cur_max_time)
+
             window_counts[i] = window_counts.get(i, 0) + 1            
         sorted_times = sorted_times[j:]
         cur_min_time = cur_max_time
@@ -279,7 +288,14 @@ if __name__ == "__main__":
     logger.info("Found %d sub-docs, min time = %d, max time = %d, window count = %d", sum([len(v) for v in data.values()]), min_time, max_time, len(window_counts))
     #print(window_counts)
     #sys.exit()
-    
+
+            
+        sorted_times = sorted_times[j:]
+        cur_min_time = cur_max_time
+
+    logger.info("Found %d sub-docs, min time = %d, max time = %d", sum([len(v) for v in data.values()]), min_time, max_time)
+
+
     #subdocs_counts = []
     #window_counts = {}
     #train_window_counts = {}
@@ -302,10 +318,15 @@ if __name__ == "__main__":
             if len(subdoc["counts"]) > 0:
                 subdoc_counts[name].append(subdoc) #(window, yr, subdoc_counts, title, author, i))
                 window_counts[name][window] = window_counts[name].get(window, 0) + 1
+
     #print(window_counts)
     windows_to_keep = set([w for w in window_counts["train"].keys() if all([w in v for v in window_counts.values()])])
     #print(len(windows_to_keep))
     #sys.exit()
+
+
+    windows_to_keep = set([w for w in window_counts["train"].keys() if all([w in v for v in window_counts.values()])])
+>>>>>>> fe5fbfeebd540fca44991b9cb0ff002f5360ec34
     window_transform = {w : i for i, w in enumerate(sorted(windows_to_keep))}
 
     for name in list(subdoc_counts.keys()):

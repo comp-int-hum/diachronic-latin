@@ -32,6 +32,7 @@ if __name__ == "__main__":
     logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 
     with gzip.open(args.model, "rb") as ifd:
+
         model = torch.load(ifd, map_location=torch.device("cpu"))
 
     token2id = {v : k for k, v in model.id2token.items()}

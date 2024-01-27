@@ -1,4 +1,5 @@
 import argparse
+
 import math
 import gzip
 import logging
@@ -28,6 +29,7 @@ if __name__ == "__main__":
             dep_stddevs = []
             wlens = []
             slens = []
+
             dists = []
             for sent in j["content"]:
                 if len(sent) > 1:
@@ -45,6 +47,7 @@ if __name__ == "__main__":
                     slens.append(len(sent))
                     dep_stddevs.append(adj.sum(0).std())
                     dists.append(sum(ds) / len(ds))
+
             ofd.write(
                 json.dumps(
                     {
@@ -54,6 +57,7 @@ if __name__ == "__main__":
                         "diameters" : diams,
                         "sentence_lengths" : slens,
                         "word_lengths" : wlens,
+
                         "dependent_stddevs" : dep_stddevs,
                         "dists" : dists
                     }

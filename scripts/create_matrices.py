@@ -19,6 +19,7 @@ if __name__ == "__main__":
     parser.add_argument("--output", dest="output", help="Output file")
     parser.add_argument("--window_size", dest="window_size", default=75, type=int)
     parser.add_argument("--min_time", dest="min_time", default=-200, type=int)
+    parser.add_argument("--window_size", dest="window_size", default=50, type=int)
     args = parser.parse_args()
 
     logging.basicConfig(level=logging.INFO)
@@ -51,9 +52,14 @@ if __name__ == "__main__":
                     unique_topics.add(t)
 
     sorted_times = list(sorted(unique_times))
+
     min_time = args.min_time #sorted_times[0]
     max_time = sorted_times[-1]
-    
+
+    min_time = sorted_times[0]
+    max_time = sorted_times[-1]
+
+
     time2window = {}
     cur_min_time = min_time
     cur_max_time = min_time
@@ -113,6 +119,8 @@ if __name__ == "__main__":
     
     # author title year diameters sentence_lengths word_lengths dependent_stddevs
     syntactic_measures = ["diameters", "sentence_lengths", "word_lengths", "dependent_stddevs", "dists"]
+    syntactic_measures = ["diameters", "sentence_lengths", "word_lengths", "dependent_stddevs"]
+
     with gzip.open(args.parse_stats, "rt") as ifd:
         for i, line in enumerate(ifd):
             j = json.loads(line)
@@ -127,10 +135,10 @@ if __name__ == "__main__":
                 window_sequences[window][meas] = window_sequences[window].get(meas, [])
                 for v in j[meas]:
                     window_sequences[window][meas].append(v)
+
     window_sequences = {w : {meas : (sum(vals) / len(vals), numpy.array(vals).std()) for meas, vals in measures.items()} for w, measures in window_sequences.items()}
 
-
-
+    window_sequences = {w : {meas : sum(vals) / len(vals) for meas, vals in measures.items()} for w, measures in window_sequences.items()}
     
     matrices = {
         "start" : min_time,
