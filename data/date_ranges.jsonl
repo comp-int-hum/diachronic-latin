@@ -1,0 +1,157 @@
+{"authors": ["Pomponius Mela"], "titles": ["De chorographia"], "start" : 42, "end" : 44}
+{"authors": ["Apicius"], "titles": ["De Re Coquinaria"], "start" : 449, "end" : 450}
+{"authors": ["M. Terentius Varro"], "titles": ["Res rusticae"], "start" : -116, "end" : -27}
+{"authors": ["Hegemonius"], "titles": ["Acta Archelai"], "start" : 349, "end" : 351, "trans" : "greek"}
+{"authors": ["Musonius Rufus"], "titles": ["Fragmenta minora"], "start" : 30, "end" : 100}
+{"authors": ["Themistius"], "titles": ["In Aristotelis Metaphysicorum"], "start" : 317, "end" : 387}
+{"authors": ["Julius Caesar"], "titles": ["De bello Gallico"], "start" : -100, "end" : -44}
+{"authors": ["Tibullus"], "titles": ["Elegiae"], "start" : -55, "end" : -19}
+{"authors": ["Sulpicia"], "titles": ["Carmina Omnia"], "start" : -55, "end" : -19}
+{"authors": ["Titus Livius (Livy)"], "titles": ["Ab urbe condita"], "start" : -59, "end" : 17}
+{"authors": ["P. Terentius Afer"], "titles": ["Andria"], "start" : -190, "end" : -159}
+{"authors": ["Florus, Lucius Annaeus"], "titles": ["Epitome Rerum Romanorum"], "start" : 74, "end" : 130}
+{"authors": ["Ammianus Marcellinus"], "titles": ["Res Gestae"], "start" : 330, "end" : 395}
+{"authors": ["Persius"], "titles": ["Saturae"], "start" : 34, "end" : 62}
+{"authors": ["Jerome, Saint"], "titles": ["Epistulae. Selections."], "start" : 345, "end" : 420}
+{"authors": ["T. Maccius Plautus"], "titles": ["Cistellaria"], "start" : -254, "end" : -184}
+{"authors": ["Sextus Propertius"], "titles": ["Elegiae"], "start" : -50, "end" : -15}
+{"authors": ["Q. Tullius Cicero"], "titles": ["Commentariolum Petitionis"], "start" : -102, "end" : -43}
+{"authors": ["Cornelius Tacitus"], "titles": ["De Vita Iulii Agricolae"], "start" : 56, "end" : 120}
+{"authors": ["Tertullian"], "titles": ["Ad Uxorem"], "start" : 155, "end" : 220}
+{"authors": ["P. Vergilius Maro"], "titles": ["Eclogues"], "start" : -70, "end" : -19}
+{"authors": ["Minucius Felix"], "titles": ["Octavius"], "start" : 150, "end" : 250}
+{"authors": ["Silius Italicus"], "titles": ["Punica"], "start" : 26, "end" : 101}
+{"authors": ["Prudentius"], "titles": ["Contra Symmachum"], "start" : 348, "end" : 413}
+{"authors": ["Valerius Maximus"], "titles": ["Facta et Dicta Memorabilia"], "start" : 14, "end" : 37}
+{"authors": ["Seneca"], "titles": ["Agamemnon"], "start" : -4, "end" : 65}
+{"authors": ["Pliny the Younger"], "titles": ["Letters"], "start" : 61, "end" : 113}
+{"authors": ["Quintilian"], "titles": ["Institutio Oratoria"], "start" : 35, "end" : 100}
+{"authors": ["Curtius Rufus, Quintus"], "titles": ["Historiae Alexandri Magni"], "start" : 40, "end" : 45}
+{"authors": ["Pliny the Elder"], "titles": ["Naturalis Historia"], "start" : 23, "end" : 79}
+{"authors": ["Columella"], "titles": ["Res Rustica, Books I-IX"], "start" : 4, "end" : 70}
+{"authors": ["Aulus Gellius"], "titles": ["Noctes Atticae"], "start" : 125, "end" : 180}
+{"authors": ["Lucretius"], "titles": ["De Rerum Natura"], "start" : -99, "end" : -55}
+{"authors": ["Juvenal"], "titles": ["Saturae"], "start" : 100, "end" : 130}
+{"authors": ["Sallust"], "titles": ["The Catilinarian Conspiracy"], "start" : -86, "end" : -35}
+{"authors": ["Martial"], "titles": ["Epigrammata"], "start" : 40, "end" : 103}
+{"authors": ["P. Ovidius Naso"], "titles": ["Fasti"], "start" : -43, "end" : 18}
+{"authors": ["Apuleius"], "titles": ["Apologia"], "start" : 124, "end" : 170}
+{"authors": ["M. Tullius Cicero"], "titles": ["De Partitione Oratoria"], "start" : -106, "end" : -43}
+{"authors": ["C. Valerius Catullus"], "titles": ["Carmina"], "start" : -84, "end" : -54}
+{"authors": ["Ausonius, Decimus Magnus"], "titles": ["Ausonii Burdigalensis Vasatis Gratiarum Actio Ad Grati Angratianum\n                    Imperatorem Pro Consulatu"], "start" : 310, "end" : 395}
+{"authors": ["Cornelius Nepos"], "titles": ["Phocion"], "start" : -110, "end" : -25}
+{"authors": ["Phaedrus"], "titles": ["Fabulae Aesopiae"], "start" : -15, "end" : 50}
+{"authors": ["Vitruvius Pollio"], "titles": ["De Architectura"], "start" : -75, "end" : -15}
+{"authors": ["Valerius Flaccus "], "titles": ["Argonautica"], "start" : 70, "end" : 72}
+{"authors": ["P. Papinius Statius"], "titles": ["Thebais"], "start" : 45, "end" : 96}
+{"authors": ["M. Annaeus Lucanus"], "titles": ["Pharsalia"], "start" : 39, "end" : 65}
+{"authors": ["Seneca the Elder"], "titles": ["Controversiae"], "start" : -54, "end" : 39}
+{"authors": ["Suetonius"], "titles": ["Vitellius"], "start" : 69, "end" : 122}
+{"authors": ["Claudian"], "titles": ["Panegyricus dictus Probino et Olybrio consulibus"], "start" : 370, "end" : 404}
+{"authors": ["Q. Horatius Flaccus"], "titles": ["Carmina"], "start" : -65, "end" : -8}
+{"authors": ["Petronius"], "titles": ["Satyricon"], "start" : 27, "end" : 66}
+{"authors": ["Eucherius of Lyon"], "titles": [], "start" : 380, "end" : 449}
+{"authors": ["John Cassian"], "titles": ["Conlationes Patrum (Collationibus). Selections."], "start" : 360, "end" : 435}
+{"authors": ["Severus, Sulpicius"], "titles": ["Epistulae (Tres)"], "start" : 363, "end" : 425}
+{"authors": ["Optatus, Saint, Bishop of Mileve"], "titles": ["S. Optati Milevitani libri VII"], "start" : 366, "end" : 390}
+{"authors": ["Salvian of Marseilles"], "titles": ["Ad Ecclesiam Libri IIII"], "start" : 400, "end" : 450}
+{"authors": ["Pontius Diaconus"], "titles": ["Vita Caecilii Cypriani"], "start" : 258, "end" : 260}
+{"authors": ["Marius Victorinus"], "titles": ["De Machabeis"], "start" : 350, "end" : 360}
+{"authors": ["Evagrius Monachus"], "titles": ["Altercatio Legis inter Simonem Iudaeum et Theophilum Christianum"], "start" : 400, "end" : 500}
+{"authors": ["Ambrose"], "titles": ["De Tobia"], "start" : 339, "end" : 397}
+{"authors": ["Orientius, Saint"], "titles": ["Commonitorium"], "start" : 420, "end" : 440}
+{"authors": ["Julius Firmicus Maternus"], "titles": ["De errore profanarum religionum"], "start" : 334, "end" : 337}
+{"authors": ["Orosius, Paulus"], "titles": ["Historiae Adversum Paganos"], "start" : 375, "end" : 420}
+{"authors": ["Arnobius of Sicca"], "titles": ["Adversus nationes Libri VII"], "start" : 230, "end" : 330}
+{"authors": ["Lucifer, Bishop of Cagliari"], "titles": ["De Regibus Apostaticis"], "start" : 300, "end" : 370}
+{"authors": ["Proba, active 4th century"], "titles": ["Cento"], "start" : 306, "end" : 353}
+{"authors": ["Paulinus of Pella"], "titles": ["Eucharisticus"], "start" : 377, "end" : 461}
+{"authors": ["Lactantius"], "titles": ["De Opificio Dei"], "start" : 250, "end" : 355}
+{"authors": ["Minucius Felix"], "titles": ["Octavius"], "start" : 150, "end" : 270}
+{"authors": ["Rufinus of Aquileia"], "titles": ["Interpretatio Orationum Gregorii Nazianzeni"], "start" : 344, "end" : 411}
+{"authors": ["Philastrius"], "titles": ["Diversarum hereseon liber"], "start" : 340, "end" : 397}
+{"authors": ["Magnus Felix Ennodius"], "titles": ["Praeceptum Quando Iussi Sunt Omnes Episcopi Cellulanos Habere"], "start" : 473, "end" : 521}
+{"authors": ["Hilary, Saint, Bishop of Poitiers"], "titles": ["Oratio Synodi Sardicensis ad Constantium Imperatorem"], "start" : 310, "end" : 367}
+{"authors": ["Priscillian, Bishop of Avila"], "titles": ["Canones (In Pauli Apostoli Epistula Canones A Peregrino Episcopo)"], "start" : 340, "end" : 385}
+{"authors": ["Augustine"], "titles": ["De Natura Boni"], "start" : 354, "end" : 430}
+{"authors": ["Cyprianus Gallus"], "titles": ["Heptateuchos"], "start" : 397, "end" : 430}
+{"authors": ["Faustus of Riez"], "titles": ["Sermones"], "start" : 400, "end" : 490}
+{"authors": ["Victor Vitensis"], "titles": ["Historia persecutionis Africanae provinciae"], "start" : 430, "end" : 500}
+{"authors": ["Ruricius I, Bishop of Limoges"], "titles": ["Epistulae"], "start" : 440, "end" : 510}
+{"authors": ["Juvencus, Caius Vettius Aquilinus"], "titles": ["Evangeliorum libri quattuor"], "start" : 330, "end" : 340}
+{"authors": ["Victor, Claudius Marius"], "titles": ["Commentariorum In Genesim Libri Tres"], "start" : 375, "end" : 446}
+{"authors": ["Commodianus"], "titles": ["Carmen Apologeticum"], "start" : 240, "end" : 260}
+{"authors": ["Claudianus Mamertus"], "titles": ["De Statu Animae"], "start" : 450, "end" : 473}
+{"authors": ["Sedulius"], "titles": ["Hymnus I"], "start" : 400, "end" : 450}
+{"authors": ["Flavius Josephus"], "titles": ["De Iudaeorum Vetustate sive Contra Apionem"], "start" : 37, "end" : 100}
+{"authors": ["Victorinus, Saint, Bishop of Poetovio"], "titles": ["Commentarii in Apocalypsin"], "start" : 280, "end" : 304}
+{"authors": ["Cyprian, Saint"], "titles": ["Testimoniorum Libri Tres adversus Judaeos"], "start" : 210, "end" : 258}
+{"authors": ["Ambrosiaster", "Pseudo-Augustinus (attributed)"], "titles": ["Pseudo-Augustini Quaestiones Veteris et Novi Testamenti CXXVII"], "start" : 366, "end" : 384}
+{"authors": ["Hilary, Saint, Archbishop of Arles"], "titles": ["Epistulae ad Eucherium"], "start" : 403, "end" : 449}
+{"authors": ["Eugippius"], "titles": ["Vita Sancti Severini"], "start" : 460, "end" : 535}
+{"authors": ["Paulinus of Nola"], "titles": ["Carmina"], "start" : 354, "end" : 431}
+{"authors": ["Paulinus Petricordiae"], "titles": ["De Vita Sancti Martini"], "start" : 459, "end" : 472}
+{"authors": ["Secundinus Manichaeus"], "titles": ["Epistula Secundini ad Augustinum"], "start" : 402, "end" : 405}
+{"title": "S. Silviae Peregrinatio", "start" : 384, "end" : 386}
+{"title": "Maximus et Balbinus", "start" : 350, "end" : 450}
+{"title": "Commodus Antoninus", "start" : 350, "end" : 450}
+{"title": "Probus", "start" : 350, "end" : 450}
+{"title": "Pescennius Niger", "start" : 350, "end" : 450}
+{"title": "Alexander Severus", "start" : 350, "end" : 450}
+{"title": "De vita Hadriani", "start" : 350, "end" : 450}
+{"title": "Valeriani Duo", "start" : 350, "end" : 450}
+{"title": "Helvius Pertinax", "start" : 350, "end" : 450}
+{"title": "Antoninus Pius", "start" : 350, "end" : 450}
+{"title": "Tyranni Triginta", "start" : 350, "end" : 450}
+{"title": "Antoninus Geta", "start" : 350, "end" : 450}
+{"title": "Carus et Carinus et Numerianus", "start" : 350, "end" : 450}
+{"title": "Marcus Antoninus Philosophus", "start" : 350, "end" : 450}
+{"title": "Diadumenus Antoninus", "start" : 350, "end" : 450}
+{"title": "Gordiani Tres", "start" : 350, "end" : 450}
+{"title": "Avidius Cassius", "start" : 350, "end" : 450}
+{"title": "Tacitus", "start" : 350, "end" : 450}
+{"title": "Severus", "start" : 350, "end" : 450}
+{"title": "Antoninus Heliogabalus", "start" : 350, "end" : 450}
+{"title": "Firmus Saturninus, Proculus et Bonosus", "start" : 350, "end" : 450}
+{"title": "Clodius Albinus", "start" : 350, "end" : 450}
+{"title": "Maximini Duo", "start" : 350, "end" : 450}
+{"title": "Helius", "start" : 350, "end" : 450}
+{"title": "Gallieni Duo", "start" : 350, "end" : 450}
+{"title": "Didius Julianus", "start" : 350, "end" : 450}
+{"title": "Antoninus Caracallus", "start" : 350, "end" : 450}
+{"title": "Divus Claudius", "start" : 350, "end" : 450}
+{"title": "Opilius Macrinus", "start" : 350, "end" : 450}
+{"title": "Verus", "start" : 350, "end" : 450}
+{"title": "Divus Aurelianus", "start" : 350, "end" : 450}
+{"authors": ["Pseudo-Hilarius"], "titles": ["De Evangelio"], "start" : 400, "end" : 500}
+{"authors": ["Anonymous"], "titles": ["Breviarius de Hierosolyma"], "start" : 400, "end" : 530}
+{"author": "Paul, the Apostle, Saint", "title": "Epigramma", "start" : 400, "end" : 450, "context" : "Gaul"}
+{"authors": ["Rusticus Presbyter"], "titles": ["Epistula ad Eucherium Lugdunensem\u200f"], "start" : 440, "end" : 460}
+{"authors": ["Mavortius"], "titles": ["De Ecclesia"], "start" : 480, "end" : 515}
+{"authors": ["Anonymous"], "titles": ["Itinerarium Hierosolymitanum"], "start" : 334, "end" : 340, "context" : "Gaul"}
+{"authors": ["Pseudo-Tertullian"], "titles": ["Incerti Auctoris Carmen Sodoma"], "start" : 380, "end" : 420}
+{"authors": ["Pomponius"], "titles": ["Versus Ad Gratiam Domini"], "start" : 380, "end" : 420}
+{"authors": ["Evodius, Bishop of Uzalis"], "titles": ["De fide Contra Manicheos"], "start" : 410, "end" : 430}
+{"authors": ["Pseudo-Victor Vitensis"], "titles": ["Passio septem monachorum"], "start" : 435, "end" : 534}
+{"authors": ["Celsus"], "titles": ["De Medicina"], "start" : 1, "end" : 50}
+#{"authors": ["Anna Comnena"], "titles": ["Alexias"], "start" : 1083, "end" : 1153}
+#{"authors": ["Theodosius"], "titles": ["De Situ Terrae Sanctae"], "start" : 518, "end" : 530}
+#{"authors": ["Boethius"], "titles": ["Commentaria in Porphyrium A Se Translatum (editio secunda)"], "start" : 480, "end" : 524}
+#{"authors": ["Adamnan"], "titles": ["De Locis Santis"], "start" : 697, "end" : 700}
+#{"authors": ["Bede the Venerable"], "titles": ["De Locis Santis"], "start" : 672, "end" : 735}
+#{"authors": ["Pseudo-Cyprian"], "titles": ["De XII Abusionibus saeculi"], "start" : 630, "end" : 700, "context" : "Ireland"}
+#{"authors": ["Remigius of Auxerre"], "titles": ["Expositione in Paschale Carmen"], "start" : 841, "end" : 908}
+#{"authors": ["Anonymous pilgrim of Piacenza"], "titles": ["Itinerarium"], "start" : 570, "end" : 580}
+#{"authors": ["Anonymous"], "titles": ["Epitaphium Ennodii"], "start" : 520, "end" : 540}
+#{"authors": ["Petrus Diaconus"], "titles": ["De Locis Santis"], "start" : 1130, "end" : 1132}
+#{"authors": ["Pseudo-Eucherius"], "titles": ["De Situ Hierusolimitanae Urbis Atque Ipsius Judaeae"], "start" : 400, "end" : 700}
+#{"authors": ["Ambrogio Novidio Fracco"], "titles": ["Sacrorum Fastorum Libri XII"], "start" : 1546, "end" : 1548}
+#{"authors": ["Catholic Church. Pope."], "titles": ["Epistulae imperatorum pontificum aliorum"], "start" : 0, "end" : 0}
+#{"authors": [], "titles": ["Corpus Scriptorum Ecclesiasticorum Latinorum (CSEL)"], "start" : 0, "end" : 0}
+#{"authors": ["Pseudo-Severus, Sulpicius"], "titles": ["Epistolae Septem"], "start" : 0, "end" : 0}
+#{"authors": ["Heraclides Ponticus"], "titles": ["Res Publica Atheniensium"], "start" : 0, "end" : 0}
+#{"authors": ["Teles Megarenesis"], "titles": ["\u03a0\u03b5\u03c1\u1f76 \u1f00\u03c0\u03b1\u03b8\u03b5\u03af\u03b1\u03c2 "], "start" : 0, "end" : 0}
+#{"authors": ["Hermann Diels"], "titles": ["Epimetrum to Anonymi Londinensis ex Aristotelis iatricis Menoniis et aliis medicis eclogae"], "start" : 0, "end" : 0}
+#{"authors": ["K. F. G. Kenyon"], "titles": ["Signorum Explicatio to Iatrica"], "start" : 0, "end" : 0}
+#{"authors": ["Vitae Homeri"], "titles": ["Suidae vita"], "start" : 0, "end" : 0}
+#{"authors": ["Anonymous"], "titles": ["\u1f19\u03c1\u03bc\u03bf\u1fe6 \u03c4\u03c1\u03b9\u03c3\u03bc\u03b5\u03b3\u03af\u03c3\u03c4\u03bf\u03c5 \u03b2\u03af\u03b2\u03bb\u03bf\u03c2 \u1f31\u03b5\u03c1\u1f70 \u03c0\u03c1\u1f78\u03c2 \u1f08\u03c3\u03ba\u03bb\u03b7\u03c0\u03b9\u1f78\u03bd \u03c0\u03c1\u03bf\u03c3\u03c6\u03c9\u03bd\u03b7\u03b8\u03b5\u1fd6\u03c3\u03b1"], "start" : 0, "end" : 0}

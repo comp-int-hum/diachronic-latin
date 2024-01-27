@@ -29,20 +29,42 @@ vars.AddVariables(
     ("DEV_PROPORTION", "", 0.1),
     ("TEST_PROPORTION", "", 0.1),    
     ("HATHITRUST_ROOT", "", "~/corpora/hathi_trust"),
+    ("PERSEUS_ROOT", "", "~/corpora/perseus"),
     ("PERSEUS_CORPUS", "", "~/corpora/perseus_classics.zip"),
     ("HATHITRUST_INDEX", "", "${HATHITRUST_ROOT}/hathi_full_20211001.txt.gz"),
-    ("DTM_ROOT", "Path to the (compiled) dynamic topic modeling repository", "~/projects/dtm"),
     ("TOKENS_PER_CHUNK", "", 200),
     ("WINDOW_COUNT", "", 20),
     ("RANDOM_SEED", "", 0),
     ("MIN_TOKEN_PROPORTION", "", 0.00001),
     ("MAX_CHUNK_PROPORTION", "", 0.2),
-    ("MAX_CHUNKS_PER_WINDOW", "", 500),
-    ("TOPIC_COUNT", "", 20),
+    #("TOPIC_COUNT", "", 20),
     ("USE_PRECOMPUTED_FEATURES", "If set, the file 'work/features.jsonl.gz' should already exist (e.g. from an earlier invocation of the build, or copied from another location)", False),
     ("USE_PRETRAINED_TOPIC_MODELS", "If set, the various 'dtm_model*.tgz' files should exist under work/", False),
-    #("CPU_QUEUE", "", "defq"),
+    ("TOP_NEIGHBORS", "", 15),
+    ("TOP_TOPIC_WORDS", "", 5),
 
+
+    #("MAX_SUBDOC_LENGTHS", "", [500]), #[200, 500, 1000, 2000]),
+    #("MIN_WORD_OCCURRENCE", "", 10),
+    #("MAX_WORD_PROPORTION", "", 0.7),
+    ("TOP_NEIGHBORS", "", 15),
+    ("TOP_TOPIC_WORDS", "", 5),
+    ("TOPIC_COUNT", "", 50),
+    #("EPOCHS", "", 500),
+    #("LIMIT_DOCS", "", 2020),
+    #("CUDA_DEVICE", "", "cpu"),
+    ("BATCH_SIZE", "", 1000),
+    ("WINDOW_SIZE", "", 75),
+    #("LEARNING_RATE", "", 0.0001),
+    #("DETM_PATH", "", "../DETM"),
+    ("USE_PRECOMPUTED_FEATURES", "If set, the file 'work/features.jsonl.gz' should already exist", False),
+    ("USE_PRETRAINED_TOPIC_MODELS", "", False),
+    ("USE_PRETRAINED_EMBEDDINGS", "", False),
+    ("PREFIXES_TO_PRESERVE", "", ["fig", "fing", "fact", "effig", "fict", "nov", "color", "curs", "magn", "form", "multi", "morph", "eid", "schem", "typ", "plas", "mege", "kines", "chrom", "exempl", "statu", "imag", "spec", "simula", "membr", "primord", "princip", "corp", "element", "sem"]),
+    ("AUTHOR_TARGETS", "", ["Varro", "Cicero", "Lucretius"]),
+    ("WORD_SIMILARITY_TARGETS", "", ["figura", "imago", "corpus"]),
+    ("MIN_TIME", "", -250),
+    ("MAX_TIME", "", 500)
 )
 
 env = Environment(
@@ -56,7 +78,7 @@ env = Environment(
             action="python scripts/filter_hathitrust.py --output ${TARGETS[0]} --hathitrust_index ${HATHITRUST_INDEX}"
         ),
         "BuildDocumentList" : Builder(
-            action="python scripts/build_document_list.py --input ${SOURCES[0]} --output ${TARGETS[0]}"
+            action="python scripts/build_document_list.py --input ${SOURCES[0]} --output ${TARGETS[0]} --min_year ${MIN_TIME} --max_year ${MAX_TIME}"
         ),
         "HydrateDocumentList" : Builder(
             action="python scripts/hydrate_document_list.py --input ${SOURCES[0]} --output ${TARGETS[0]} --hathitrust_root ${HATHITRUST_ROOT}"
@@ -68,16 +90,10 @@ env = Environment(
             action="python scripts/filter_and_narrow_documents.py --lid ${SOURCES[0]} --content ${SOURCES[1]} --output ${TARGETS[0]}"
         ),
         "ExtractFeatures" : Builder(
-            action="python scripts/extract_features.py --input ${SOURCES[0]} --output ${TARGETS[0]}"
+            action="python scripts/extract_features.py --input ${SOURCES[0]} --output ${TARGETS[0]} --perseus_corpus ${PERSEUS_CORPUS}"
         ),
         "FormatForDTM" : Builder(
             action="python scripts/format_for_dtm.py --input ${SOURCES[0]} --text_output ${TARGETS[0]} --time_output ${TARGETS[1]} --vocab_output ${TARGETS[2]} --metadata_output ${TARGETS[3]} --tokens_per_chunk ${TOKENS_PER_CHUNK} --window_count ${WINDOW_COUNT} --random_seed ${RANDOM_SEED} --min_token_proportion ${MIN_TOKEN_PROPORTION} --max_chunk_proportion ${MAX_CHUNK_PROPORTION}  --lowercase --max_chunks_per_window ${MAX_CHUNKS_PER_WINDOW}"
-        ),
-        "TrainDTM" : Builder(
-            action="python scripts/train_dtm.py --text_input ${SOURCES[0]} --time_input ${SOURCES[1]} --dtm_path ${DTM_ROOT} --output ${TARGETS[0]} --topic_count ${TOPIC_COUNT}"
-        ),
-        "InspectDTM" : Builder(
-            action="python scripts/inspect_dtm.py --model ${SOURCES[0]} --vocab ${SOURCES[1]} --metadata ${SOURCES[2]} --text ${SOURCES[3]} --time ${SOURCES[4]} --docs ${SOURCES[5]} --output ${TARGETS[0]}"
         ),
         "CompareVocabularies" : Builder(
             action="python scripts/compare_vocabularies.py --input_htid ${INPUT_HTID} --input_perseus ${INPUT_PERSEUS} --hathitrust_root ${HATHITRUST_ROOT} --output ${TARGETS[0]} --perseus_root ${PERSEUS_ROOT}"
@@ -93,7 +109,37 @@ env = Environment(
         ),
         "CombineFeatures" : Builder(
             action="python scripts/combine_features.py --input ${SOURCES[0]} --output ${TARGETS[0]}"
-        )        
+        ),
+        "MarshallPerseus" : Builder(
+            action="python scripts/marshall_perseus.py --perseus_root ${PERSEUS_ROOT} --date_ranges data/date_ranges.jsonl --output ${TARGETS[0]}"
+        ),
+        "TrainEmbeddings" : Builder(
+            action="python scripts/train_embeddings.py --input ${SOURCES[0]} --output ${TARGETS[0]}"
+        ),
+        "TrainDETM" : Builder(
+            action="python scripts/train_detm.py --train ${SOURCES[0]} ${'--val ' + SOURCES[2].rstr() if len(SOURCES) == 3 else ''} --embeddings ${SOURCES[1]} --window_size ${WINDOW_SIZE} --max_subdoc_length ${MAX_SUBDOC_LENGTH} --device ${CUDA_DEVICE} --batch_size ${BATCH_SIZE} --epochs ${EPOCHS} --output ${TARGETS[0]} --num_topics ${TOPIC_COUNT} --learning_rate ${LEARNING_RATE} --min_word_occurrence ${MIN_WORD_OCCURRENCE} --max_word_proportion ${MAX_WORD_PROPORTION} ${'--min_time ' + str(MIN_TIME) if MIN_TIME else ''} ${'--max_time ' + str(MAX_TIME) if MAX_TIME else ''}"
+        ),
+        "ApplyDETM" : Builder(
+            action="python scripts/apply_detm.py --model ${SOURCES[0]} --input ${SOURCES[1]} --max_subdoc_length ${MAX_SUBDOC_LENGTH} --output ${TARGETS[0]}"
+        ),
+        "GenerateWordSimilarityTable" : Builder(
+            action="python scripts/generate_word_similarity_table.py --model ${SOURCES[0]} --output ${TARGETS[0]} --target_words ${WORD_SIMILARITY_TARGETS} --top_neighbors ${TOP_NEIGHBORS}"
+        ),
+        "GenerateTopicsSummaryTable" : Builder(
+            action="python scripts/generate_topics_summary_table.py --model ${SOURCES[0]} --output ${TARGETS[0]} --top_words ${TOP_TOPIC_WORDS}"
+        ),
+                "CollectParsingStatistics" : Builder(
+            action="python scripts/collect_parsing_statistics.py --input ${SOURCES[0]} --output ${TARGETS[0]}"
+        ),
+        "CollectTopicStatistics" : Builder(
+            action="python scripts/collect_topic_statistics.py --input ${SOURCES[0]} --output ${TARGETS[0]}"
+        ),
+        "CreateMatrices" : Builder(
+            action="python scripts/create_matrices.py --parse_stats ${SOURCES[0]} --topic_annotations ${SOURCES[1]} --output ${TARGETS[0]} --window_size ${WINDOW_SIZE} --min_time ${MIN_TIME}"
+        ),
+        "CreateFigures" : Builder(
+            action="python scripts/create_figures.py --input ${SOURCES[0]} --image ${TARGETS[0]} --latex ${TARGETS[1]}"
+        )
     }
 )
 
@@ -111,104 +157,184 @@ env['PRINT_CMD_LINE_FUNC'] = print_cmd_line
 # and how we decide if a dependency is out of date
 env.Decider("timestamp-newer")
 
-if env["USE_PRECOMPUTED_FEATURES"]:
 
-    cltk_features = env.File("work/features.jsonl.gz")
-    
-else:
+latin_documents = env.FilterHathiTrust(
+    "work/latin_documents.tsv.gz",
+    []
+)
 
-    latin_documents = env.FilterHathiTrust(
-        "work/latin_documents.tsv.gz",
-        []
-    )
+relevant_document_list = env.BuildDocumentList(
+    "work/relevant_latin_documents.jsonl.gz",
+    latin_documents
+)
 
-    relevant_document_list = env.BuildDocumentList(
-        "work/relevant_latin_documents.jsonl.gz",
-        latin_documents
-    )
+hydrated_document_list = env.HydrateDocumentList(
+    "work/hydrated_documents.jsonl.gz",
+    relevant_document_list
+)
 
-    hydrated_document_list = env.HydrateDocumentList(
-        "work/hydrated_documents.jsonl.gz",
-        relevant_document_list
-    )
+perseus_documents = env.MarshallPerseus(
+    "work/perseus.jsonl.gz",
+    []
+)
 
-    lid_output = env.PerformLID(
-       "work/lid_output.jsonl.gz",
-       hydrated_document_list
-    )
+lid_output = env.PerformLID(
+    "work/lid_output.jsonl.gz",
+    hydrated_document_list,
+    GRID_MEMORY="16G"
+)
 
-    final_documents = env.FilterAndNarrowDocuments(
-        "work/final_documents.jsonl.gz",
-        [lid_output, hydrated_document_list]
-    )
+htc_documents = env.FilterAndNarrowDocuments(
+    "work/final_documents.jsonl.gz",
+    [lid_output, hydrated_document_list]
+)
 
+for name, docs in [("perseus", perseus_documents), ("htc", htc_documents)][:1]:
     feat_files = []
     for j, subfile in enumerate(
             env.SplitJSONL(
-                ["work/final_documents_split_{}.jsonl.gz".format(i) for i in range(1, 21)],
-                final_documents
+                ["work/final_documents_split_{}_{}.jsonl.gz".format(name, i) for i in range(1, 51)],
+                docs
             )
     ):
         feat_files.append(
-            env.ExtractFeatures(
-                "work/features_split_{}.jsonl.gz".format(j + 1),
-                subfile
-            )
+           env.ExtractFeatures(
+               "work/features_split_{}_{}.jsonl.gz".format(name, j + 1),
+               subfile,
+               GRID_MEMORY="32G"               
+           )
         )
 
     cltk_features = env.CombineJSONL(
-        "work/features.jsonl.gz",
+        "work/features_{}.jsonl.gz".format(name),
         feat_files
     )
 
-text_for_dtm = env.FilterUnknownWords(
-    "work/text_for_dtm.jsonl.gz",
-    cltk_features
-)
+    text_for_detm = env.FilterUnknownWords(
+        "work/text_for_detm_{}.jsonl.gz".format(name),
+        cltk_features
+    )
 
-if env["USE_PRETRAINED_TOPIC_MODELS"]:
+    parse_stats = env.CollectParsingStatistics(
+        "work/parsing_stats_{}.jsonl.gz".format(name),
+        cltk_features
+    )
 
-    model = env.File("work/dtm_model.tgz")
-    
-else:
-    
-    dtm_text_input, dtm_time_input, vocab, metadata = env.FormatForDTM(
+    embeddings = env.TrainEmbeddings(
+        "work/embeddings_{}.bin".format(name),
+        text_for_detm,
+        GRID_MEMORY="32G"
+    )
+
+    topic_model = env.TrainDETM(
+        "work/detm_model_${MAX_SUBDOC_LENGTH}_%s.bin.gz" % (name),
         [
-            "work/dtm_input-mult.dat",
-            "work/dtm_input-seq.dat",
-            "work/dtm_vocab.json.gz",
-            "work/dtm_doc_metadata.jsonl.gz"
+            text_for_detm,
+            embeddings
         ],
-        text_for_dtm
+        BATCH_SIZE=2000,
+        EPOCHS=1000,
+        MIN_WORD_OCCURRENCE=1,
+        MAX_WORD_PROPORTION=0.7,
+        #WINDOW_SIZE=100,
+        LEARNING_RATE=0.0008*20,
+        CUDA_DEVICE="cuda",
+        MAX_SUBDOC_LENGTH=500,
+        GRID_MEMORY="32G",
+        GRID_QUEUE="a100",
+        GRID_GPU_COUNT="1",
+        GRID_ACCOUNT="tlippin1_gpu"
     )
 
-    topic_model = env.TrainDTM(
-        "work/dtm_model.tgz",
-        [
-            dtm_text_input,
-            dtm_time_input
-        ]
+    word_similarity_table = env.GenerateWordSimilarityTable(
+        "work/word_similarity_${MAX_SUBDOC_LENGTH}_%s.tex" % (name),
+        [topic_model],
+        WORD_SIMILARITY_TARGETS=["figura", "imago", "fortuna", "praefectus", "corpus", "bellum"],
+        MAX_SUBDOC_LENGTH=500,
+        TOP_NEIGHBORS=5
     )
 
-# topic_model_features = env.ApplyDTM(
-#     "work/dtm_features.jsonl.gz",
-#     [
-#         topic_model,
-#         text_for_dtm
-#     ]
-# )
-
-summary = env.InspectDTM(
-    "work/dtm_summary.txt",
-    [
+    topics_table = env.GenerateTopicsSummaryTable(
+        "work/topics_summary_${MAX_SUBDOC_LENGTH}_%s.tex" % (name),
         topic_model,
-        vocab,
-        metadata,
-        dtm_text_input,
-        dtm_time_input,
-        text_for_dtm,
-    ]
-)
+        MAX_SUBDOC_LENGTH=500,        
+    )
+
+    # labeled = env.ApplyDETM(
+    #     "work/labeled_${MAX_SUBDOC_LENGTH}_%s.jsonl.gz" % (name),
+    #     [topic_model, text_for_detm],
+    #     MAX_SUBDOC_LENGTH=500,
+    #     GRID_MEMORY="32G",
+    #     #GRID_QUEUE="a100",
+    #     #GRID_GPU_COUNT="1",
+    #     #GRID_ACCOUNT="tlippin1_gpu"        
+    # )
+
+    # matrices = env.CreateMatrices(
+    #     "work/matrices_${MAX_SUBDOC_LENGTH}_%s.pkl.gz" % (name),
+    #     [
+    #         parse_stats,
+    #         labeled
+    #     ],
+    #     MAX_SUBDOC_LENGTH=500,
+    #     GRID_MEMORY="64G"
+    # )
+    
+    # figures = env.CreateFigures(
+    #     [
+    #         "work/plots_${MAX_SUBDOC_LENGTH}_%s.png" % (name),
+    #         "work/tables_${MAX_SUBDOC_LENGTH}_%s.tex" % (name)
+    #     ],
+    #     matrices,
+    #     MAX_SUBDOC_LENGTH=500,
+    #     WINDOW_SIZE=100
+    # )
+
+
+    
+    # if env["USE_PRETRAINED_TOPIC_MODELS"]:
+
+    #     model = env.File("work/dtm_model_{}.tgz".format(name))
+
+    # else:
+
+    #     dtm_text_input, dtm_time_input, vocab, metadata = env.FormatForDTM(
+    #         [
+    #             "work/dtm_input-mult.dat",
+    #             "work/dtm_input-seq.dat",
+    #             "work/dtm_vocab.json.gz",
+    #             "work/dtm_doc_metadata.jsonl.gz"
+    #         ],
+    #         text_for_dtm
+    #     )
+
+    #     topic_model = env.TrainDTM(
+    #         "work/dtm_model.tgz",
+    #         [
+    #             dtm_text_input,
+    #             dtm_time_input
+    #         ]
+    #     )
+
+    # topic_model_features = env.ApplyDTM(
+    #     "work/dtm_features.jsonl.gz",
+    #     [
+    #         topic_model,
+    #         text_for_dtm
+    #     ]
+    # )
+
+    # summary = env.InspectDTM(
+    #     "work/dtm_summary.txt",
+    #     [
+    #         topic_model,
+    #         vocab,
+    #         metadata,
+    #         dtm_text_input,
+    #         dtm_time_input,
+    #         text_for_dtm,
+    #     ]
+    # )
 
 # vocab_comparison = env.CompareVocabularies(
 #     "work/vocab_comparison.txt",

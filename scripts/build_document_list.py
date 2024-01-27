@@ -11,7 +11,7 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--input", dest="input", help="Input file")
-    parser.add_argument("--min_year", dest="min_year", type=int, default=-500, help="Minimum year")    
+    parser.add_argument("--min_year", dest="min_year", type=int, default=-250, help="Minimum year")
     parser.add_argument("--max_year", dest="max_year", type=int, default=500, help="Maximum year")
     parser.add_argument("--output", dest="output", help="Output file")
     args = parser.parse_args()
